@@ -2,7 +2,7 @@ host: 127.0.0.1
 port: 1000
 #pos_scale: 100
 #vel_scale: 10
-logger_on: true
+logger: true
 #train_type: "APPROACH"
 save_path: "../logs/single_training/"
 #max_steps: 2000
