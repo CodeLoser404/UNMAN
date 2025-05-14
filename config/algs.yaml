@@ -10,7 +10,7 @@ agent:
   tau: 0.005
   ent_coef: 0.2
 training:
-  algorithm: ppo            # or "ppo"
+  algorithm: sac            # or "ppo"
   learning_rate: 0.0003
   gamma: 0.99
-  device: cpu
+  device: cuda

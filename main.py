@@ -4,18 +4,20 @@ main函数，用于训练模型并保存
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 from envs.train_env import TrainEnv
 from utils import custom_model
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.logger import configure
 from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
-def main():
+def train():
     log_dir = "./logs/"
     os.makedirs(log_dir, exist_ok=True)
     logger = configure(log_dir, ["stdout", "csv"])
     checkpoint_callback = CheckpointCallback(
-        save_freq=100000,
+        save_freq=10000,
         save_path="./model/",
         name_prefix="model",
         save_replay_buffer=True,
@@ -23,11 +25,41 @@ def main():
     )
     base_env = TrainEnv(config_path='./config/envs.yaml')
     env = Monitor(base_env)
+    env = DummyVecEnv([lambda: env])
+    env = VecNormalize(env, norm_obs=True, norm_reward=True)
 
     model = custom_model.create_model(config_path= './config/algs.yaml',env = env)
     model.set_logger(logger)
-    model.learn(total_timesteps=20000,progress_bar=True, reset_num_timesteps=False,log_interval=1,
+    model.learn(total_timesteps=100000,progress_bar=True, reset_num_timesteps=False,log_interval=1,
                 callback=checkpoint_callback)
 
+def infer():
+    model_path = "./model/model_50000_steps.zip"
+    vecnorm_path = "./model/model_vecnormalize_50000_steps.pkl"
+    base_env = TrainEnv(config_path='./config/envs.yaml')
+    env = DummyVecEnv([lambda: base_env])
+
+    env = VecNormalize.load(vecnorm_path, env)
+    env.training = False
+    env.norm_reward = False  # 推理阶段不对 reward 做归一化
+
+    model = custom_model.create_model(config_path='./config/algs.yaml', env=env)
+    model.load(model_path)
+
+    reward_list = []
+    for _ in range(20):
+        obs = env.reset()[0]
+        episode_reward = 0
+        for _ in range(100):
+            action = model.predict(obs, deterministic=True)
+            obs, reward, done, info = env.step(action)
+            episode_reward += reward
+            if done:
+                break
+
+        reward_list.append(episode_reward)
+    print(np.mean(reward_list))
+
 if __name__ == "__main__":
-    main()
+    # train()
+    infer()

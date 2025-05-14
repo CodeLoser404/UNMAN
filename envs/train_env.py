@@ -5,13 +5,14 @@ import numpy as np
 from utils import adaptor, action, observation, reward, truncate, initialize, visualizer
 import yaml
 import os
+from utils.reward import *
 
 def float_to_bool(f):
     if f == 0.0:
-        print("False!")
+        # print("False!")
         return False
     elif f == 1.0:
-        print("True!")
+        # print("True!")
         return True
     else:
         # Should not be here!
@@ -55,9 +56,9 @@ class TrainEnv(gymnasium.Env):
         action_lower_bound = np.negative(np.ones(shape=[4], dtype=np.float64))
         self.action_space = spaces.Box(shape=[4], dtype=np.float64, low=action_lower_bound, high=action_upper_bound)
 
-        observation_upper_bound = np.ones(shape=[15], dtype=np.float64)
-        observation_lower_bound = np.negative(np.ones(shape=[15], dtype=np.float64))
-        self.observation_space = spaces.Box(shape=[15], dtype=np.float64, low=observation_lower_bound, high=observation_upper_bound)
+        observation_upper_bound = np.ones(shape=[14], dtype=np.float64)
+        observation_lower_bound = np.negative(np.ones(shape=[14], dtype=np.float64))
+        self.observation_space = spaces.Box(shape=[14], dtype=np.float64, low=observation_lower_bound, high=observation_upper_bound)
 
         # Initialize adaptor
         self.adaptor = adaptor.NetworkAdaptor(config_path)
@@ -94,11 +95,13 @@ class TrainEnv(gymnasium.Env):
         self.my_state, self.enemy_state, terminated = split_observation(original_observation)
         if self.logger:
             self.recorder.record(self.my_state, self.enemy_state)
-        if not terminated:
-            print("FUCK!")
-            print(self.my_state)
+        # if not terminated:
+        #     print("FUCK!")
+        #     print(self.my_state)
         # Process whole state into agent state
         self.state = observation.marshal_observation(self.my_state, self.enemy_state)
+        print('action=', real_action)
+        print('self.state=', self.state)
 
         # Check for termination
         # But truncation has a higher priority
@@ -121,6 +124,9 @@ class TrainEnv(gymnasium.Env):
         self.my_state, self.enemy_state, termination = split_observation(original_observation)
         # Process whole state into agent state
         self.state = observation.marshal_observation(self.my_state, self.enemy_state)
+
+        hit_step_count = 0
+        miss_step_count = 0
         return self.state, {}
 
 
