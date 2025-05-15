@@ -5,7 +5,7 @@ import numpy as np
 from utils import adaptor, action, observation, reward, truncate, initialize, visualizer
 import yaml
 import os
-from utils.reward import *
+from utils.reward import reset_count
 
 def float_to_bool(f):
     if f == 0.0:
@@ -125,8 +125,7 @@ class TrainEnv(gymnasium.Env):
         # Process whole state into agent state
         self.state = observation.marshal_observation(self.my_state, self.enemy_state)
 
-        hit_step_count = 0
-        miss_step_count = 0
+        reset_count()
         return self.state, {}
 
 

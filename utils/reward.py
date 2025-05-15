@@ -3,7 +3,14 @@ import numpy as np
 hit_step_count = 0
 miss_step_count = 0
 is_hit = False
+has_hit = False
 
+def reset_count():
+    global hit_step_count, miss_step_count, has_hit, is_hit
+    hit_step_count = 0
+    miss_step_count = 0
+    has_hit = False
+    is_hit = False
 
 def calculate_angle_reward(my_pos, enemy_pos, my_attitude):
     # 计算指向敌机的向量
@@ -23,7 +30,7 @@ def calculate_angle_reward(my_pos, enemy_pos, my_attitude):
 
     # 计算夹角余弦值（越接近1越对准）
     cos_theta = np.dot(forward_vector, target_direction)
-    angle_reward = 100 * cos_theta if cos_theta > 0.95 else cos_theta
+    angle_reward = 10 * cos_theta if cos_theta > 0.95 else cos_theta
     return angle_reward
 
 
@@ -37,8 +44,8 @@ def calculate_reward(prev_my_state, prev_enemy_state, my_state, enemy_state):
 
     prev_dist = np.linalg.norm(prev_my_pos - prev_enemy_pos)
     cur_dist = np.linalg.norm(my_pos - enemy_pos)
-    distance_reward = (prev_dist - cur_dist)
-    if cur_dist > 1000:  # 太远了
+    distance_reward = (prev_dist - cur_dist) * 10
+    if cur_dist > 500:  # 太远了
         distance_reward = -500
     # elif cur_dist < 80:  # 太近了
     #     distance_reward = -500
@@ -53,18 +60,24 @@ def calculate_reward(prev_my_state, prev_enemy_state, my_state, enemy_state):
     prev_my_hp = prev_my_state[-1]
     prev_enemy_hp = prev_enemy_state[-1]
     hp_reward = 0
-    global is_hit, hit_step_count, miss_step_count
+    global is_hit, has_hit, hit_step_count, miss_step_count
     if my_hp < prev_my_hp:  # 我方受伤
         hp_reward -= 500
 
     if prev_enemy_hp - enemy_hp == 0:
         if is_hit:  # 之前击中了,现在没击中
             is_hit = False
-            hp_reward -= 500
+            hp_reward -= 400
+        if has_hit:
+            hp_reward -= 100
+        hp_reward -= miss_step_count * 0.1
+        miss_step_count += 1
     else:
         if not is_hit:  # 第一次击中
             is_hit = True
+            has_hit = True
             hit_step_count = 0
+            miss_step_count = 0
         hp_reward += 500 + hit_step_count * 10  # 连续命中奖励
         hit_step_count += 1
 

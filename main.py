@@ -26,7 +26,7 @@ def train():
     base_env = TrainEnv(config_path='./config/envs.yaml')
     env = Monitor(base_env)
     env = DummyVecEnv([lambda: env])
-    env = VecNormalize(env, norm_obs=True, norm_reward=True)
+    env = VecNormalize(env, norm_obs=True, norm_reward=False)
 
     model = custom_model.create_model(config_path= './config/algs.yaml',env = env)
     model.set_logger(logger)
@@ -34,14 +34,15 @@ def train():
                 callback=checkpoint_callback)
 
 def infer():
-    model_path = "./model/model_50000_steps.zip"
-    vecnorm_path = "./model/model_vecnormalize_50000_steps.pkl"
+    model_path = "./model/model_60000_steps.zip"
+    vecnorm_path = "./model/model_vecnormalize_60000_steps.pkl"
     base_env = TrainEnv(config_path='./config/envs.yaml')
     env = DummyVecEnv([lambda: base_env])
 
     env = VecNormalize.load(vecnorm_path, env)
     env.training = False
-    env.norm_reward = False  # 推理阶段不对 reward 做归一化
+    env.norm_obs = True
+    env.norm_reward = False
 
     model = custom_model.create_model(config_path='./config/algs.yaml', env=env)
     model.load(model_path)
@@ -60,6 +61,7 @@ def infer():
         reward_list.append(episode_reward)
     print(np.mean(reward_list))
 
+
 if __name__ == "__main__":
-    # train()
-    infer()
+    train()
+    # infer()
