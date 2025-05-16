@@ -87,3 +87,21 @@ def create_model(config_path, env):
         **sac_specific  # 添加SAC专用参数
     )
     return model
+
+def load_model(config_path, model_path, env):
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f)
+    algorithm = config['training']['algorithm'].lower()
+
+    model_class_map = {
+        'ppo': PPO,
+        'td3': TD3,
+        'sac': SAC
+    }
+
+    if algorithm not in model_class_map:
+        raise ValueError(f"Unsupported algorithm: {algorithm}, choose from {list(model_class_map.keys())}")
+
+    model_class = model_class_map[algorithm]
+    model = model_class.load(model_path, env=env)
+    return model

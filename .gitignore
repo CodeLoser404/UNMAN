@@ -2,6 +2,7 @@
 *.zip
 *.pkl
 *.png
+*.npz
 
 .idea/
 .vscode/

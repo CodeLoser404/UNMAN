@@ -56,9 +56,9 @@ class TrainEnv(gymnasium.Env):
         action_lower_bound = np.negative(np.ones(shape=[4], dtype=np.float64))
         self.action_space = spaces.Box(shape=[4], dtype=np.float64, low=action_lower_bound, high=action_upper_bound)
 
-        observation_upper_bound = np.ones(shape=[14], dtype=np.float64)
-        observation_lower_bound = np.negative(np.ones(shape=[14], dtype=np.float64))
-        self.observation_space = spaces.Box(shape=[14], dtype=np.float64, low=observation_lower_bound, high=observation_upper_bound)
+        observation_upper_bound = np.ones(shape=[13], dtype=np.float64)
+        observation_lower_bound = np.negative(np.ones(shape=[13], dtype=np.float64))
+        self.observation_space = spaces.Box(shape=[13], dtype=np.float64, low=observation_lower_bound, high=observation_upper_bound)
 
         # Initialize adaptor
         self.adaptor = adaptor.NetworkAdaptor(config_path)

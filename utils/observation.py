@@ -7,7 +7,6 @@ def marshal_observation(my_state, enemy_state):
     my_attitude = my_state[3:6]
     enemy_attitude = enemy_state[3:6]
     relative_vel = my_state[6:9] - enemy_state[6:9]
-    my_hp = my_state[-1]
-    enemy_hp = enemy_state[-1]
+    hp = my_state[-1] - enemy_state[-1]
     # 打开VecNormalize之后这里就不用归一化了
-    return np.concatenate((relative_pos, relative_vel, my_attitude, enemy_attitude, [my_hp, enemy_hp]), axis=0) # [14]
+    return np.concatenate((relative_pos, relative_vel, my_attitude, enemy_attitude, [hp]), axis=0) # [13]
